@@ -11,17 +11,19 @@ async function checkLibrary(){
 	// Set screen size.
 	await page.setViewport({width: 1080, height: 1024});
 
-	const searchBox = `[id="q"]`;
-
+	
+	let allBookListOutput = [];
 	const bookName = "Katabasis"
 	const bookAuthor = "Kuang"
 
 	const bookList = [{bookName: "Katabasis", bookAuthor: "Kuang"}, {bookName: "The binding", bookAuthor: "Collins"}]
+	// const oneItem = bookList[0]
 
-
+	for (let i=0; i< bookList.length; i++){
 	// =======
-
-	await page.locator(searchBox).fill(bookName);
+	const oneItem = bookList[i]
+	const searchBox = `[id="q"]`;
+	await page.locator(searchBox).fill(oneItem.bookName);
 	await page.keyboard.press('Enter');
 
 	page.on("console", (consoleObj) => console.log(consoleObj.text()));
@@ -42,14 +44,14 @@ async function checkLibrary(){
 		await page.waitForSelector('.detailItemTable');
 		await page.waitForNetworkIdle();
 
-			const results = await page.$$eval('.results_cell', function(results, bookAuthor){
+			const results = await page.$$eval('.results_cell', function(results, oneItem){
 
 			const searchResults = [];
-			console.log("bookAuthor", bookAuthor);
+			// console.log("bookAuthor", oneItem.bookAuthor);
 			results.forEach(async function(result){
 				const innerText = result.innerText;
 
-				if(innerText.includes(bookAuthor)){
+				if(innerText.includes(oneItem.bookAuthor)){
 					const id = result.id.replace("results_cell", "");
 
 					const originalSearchOutput = result.innerText;
@@ -82,7 +84,7 @@ async function checkLibrary(){
 
 						finalOutput = clean3SearchOutput.concat(bookHardcopies)
 					}
-					console.log(finalOutput);
+					// console.log(finalOutput);
 					searchResults.push(finalOutput);
 				}			
 			})
@@ -92,16 +94,24 @@ async function checkLibrary(){
 // You can't push to an array defined outside of the evaluate callback, because evaluate's callback is serialized and executed in the browser environment, not in Node. result needs to be defined inside the evaluate callback, then returned from the evaluate callback and assigned to a variable in Node.
 			
 		},
-		bookAuthor
+		oneItem
 	)
 
-	console.log('================')
-	console.log("results", results);
-	console.log('================')
+	const singleBookOutput = {
+		... oneItem,
+		results
+	}
+
+	allBookListOutput.push(singleBookOutput)
+	// console.log('================')
+	// console.log("results", results);
+	// console.log('================')
 
 
 	// =======
+	}
 
+	console.log(allBookListOutput)
 	// ---
 
 	// WORKS for single item
