@@ -45,23 +45,38 @@ async function checkLibrary(){
 
 				if(innerText.includes(bookAuthor)){
 					const id = result.id.replace("results_cell", "");
+
+					const originalSearchOutput = result.innerText;
+					let finalOutput;
+
+					// remove not useful info
+					const clean1SearchOutput = originalSearchOutput.replace("\nAdd To My Lists\nPreview\nPlace Hold", "");
+					const clean2SearchOutput = clean1SearchOutput.replace("\nAdd To My Lists\nPlace Hold", "");
+					const clean3SearchOutput = clean2SearchOutput.replace("\nAdd To My Lists", "");
+
+					finalOutput = clean3SearchOutput;
+
 					if(innerText.includes("Format:  Books")){
 						const tableId = `#detailItemTableCust${id}`;
 						const tableItself = document.querySelector('.detailItemTable');
 
 						const rows = tableItself.getElementsByClassName('detailItemsTableRow')
-						console.log("rows", rows);
+						// console.log("rows", rows);
 
+						let bookHardcopies = ""
 						for (let i = 0; i < rows.length; i++){
 							const libraryName = rows[i].getElementsByClassName('detailItemsTable_LIBRARY')
 							const shelfName = rows[i].getElementsByClassName('detailItemsTable_CALLNUMBER')
 							const statusName = rows[i].getElementsByClassName('detailItemsTable_SD_ITEM_STATUS')
 
 							const output = `${libraryName[0].innerText.replace("Searching...", "")} ${shelfName[0].innerText} ${statusName[0].innerText.replace("Searching...", "")}`
-							console.log("output", output);
+							bookHardcopies += `\n${output}`
+							// console.log("output", output);
 						}
+
+						finalOutput = clean3SearchOutput.concat(bookHardcopies)
 					}
-					console.log(result.innerText)
+					console.log(finalOutput);
 				}
 
 			
