@@ -16,6 +16,11 @@ async function checkLibrary(){
 	const bookName = "Katabasis"
 	const bookAuthor = "Kuang"
 
+	const bookList = [{bookName: "Katabasis", bookAuthor: "Kuang"}, {bookName: "The binding", bookAuthor: "Collins"}]
+
+
+	// =======
+
 	await page.locator(searchBox).fill(bookName);
 	await page.keyboard.press('Enter');
 
@@ -39,6 +44,7 @@ async function checkLibrary(){
 
 			const results = await page.$$eval('.results_cell', function(results, bookAuthor){
 
+			const searchResults = [];
 			console.log("bookAuthor", bookAuthor);
 			results.forEach(async function(result){
 				const innerText = result.innerText;
@@ -77,16 +83,25 @@ async function checkLibrary(){
 						finalOutput = clean3SearchOutput.concat(bookHardcopies)
 					}
 					console.log(finalOutput);
-				}
-
-			
+					searchResults.push(finalOutput);
+				}			
 			})
+
+			return searchResults;
 // https://stackoverflow.com/questions/62083537/puppeteer-iterate-div-and-then-from-result-iterate-child-element#comment138204360_62088370
 // You can't push to an array defined outside of the evaluate callback, because evaluate's callback is serialized and executed in the browser environment, not in Node. result needs to be defined inside the evaluate callback, then returned from the evaluate callback and assigned to a variable in Node.
 			
 		},
 		bookAuthor
 	)
+
+	console.log('================')
+	console.log("results", results);
+	console.log('================')
+
+
+	// =======
+
 	// ---
 
 	// WORKS for single item
