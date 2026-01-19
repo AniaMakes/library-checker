@@ -18,6 +18,7 @@
   "homepage": "https://github.com/AniaMakes/library-checker#readme",
   "description": "",
   "dependencies": {
+    "dotenv": "^17.2.3",
     "puppeteer": "^24.33.0"
   }
 }
