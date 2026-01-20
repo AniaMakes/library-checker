@@ -125,9 +125,7 @@ export default async function checkCambridgeshire(page, bookList) {
 								// finalOutputObject.hardcopies = bookHardcopiesArray;
 
 								// close availibility modal
-								const modalHeader = document.querySelector(".modal-header");
-								const modalCloseButton = modalHeader.querySelector("button");
-								modalCloseButton.click();
+								document.querySelector("#holdingsDlg").click();
 							}
 
 							searchResults.push(finalOutputObject);
