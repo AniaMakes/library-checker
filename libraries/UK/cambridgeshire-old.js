@@ -1,4 +1,4 @@
-// Cambridgeshire
+// Cambridgeshire pre-early-2026
 
 /**
  * Scrapes data from the City Of London library catalogue.
@@ -62,6 +62,9 @@ export default async function checkCambridgeshire(page, bookList) {
 			await page.waitForNetworkIdle();
 
 			// gets result "cards"
+
+			//TODO refactor so that results returns the list to puppeteer node process, do as much from within the node process, then get modal that way too
+
 			results = await page.$$eval(
 				".card-body",
 				function (results, oneItem) {
@@ -98,29 +101,63 @@ export default async function checkCambridgeshire(page, bookList) {
 									viewAvailibilityDiv.querySelector("a");
 								viewAvailibilityLink.click();
 
+								const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
+								await sleep(5000);
 								// const tableId = `#detailItemTableCust${id}`;
 								// const tableItself = document.querySelector(".detailItemTable");
+								const modalOutput = await page.eval$('.modal-content', function (modalResults) {
+									console.log('================')
+									console.log("modalResults", modalResults);
+									console.log('================')
+								})
 
-								// const rows = tableItself.getElementsByClassName(
-								// 	"detailItemsTableRow",
-								// );
+								console.log("1");
+								const tableItself = document.querySelectorAll("table"); // JSHandle@array
+								console.log("2");
+								// const answ = await tableItself.toElement('table')
+								console.log("Array.fromAsync(tableItself)", Array.from(tableItself));
+								console.log("3");
+
+								// tableItself.evaluate((domElement) => {
+								// 	console.log(domElement)
+								// })
+								console.log('================')
+								console.log("answ", answ);
+								console.log('================')
+
+								const rows = tableItself?.querySelectorAll("tr");
+								console.log('================')
+								console.log("rows", rows);
+								console.log('================')
+
 
 								// let bookHardcopiesArray = [];
-								// for (let i = 0; i < rows.length; i++) {
-								// 	const libraryName = rows[i].getElementsByClassName(
-								// 		"detailItemsTable_LIBRARY",
-								// 	);
-								// 	const shelfName = rows[i].getElementsByClassName(
-								// 		"detailItemsTable_CALLNUMBER",
-								// 	);
-								// 	const statusName = rows[i].getElementsByClassName(
-								// 		"detailItemsTable_SD_ITEM_STATUS",
-								// 	);
+								for (let i = 0; i < rows.length; i++) {
+									const libraryName = rows[i].querySelector(
+										'[data-caption="Location"]',
+									)
+									const shelfName = rows[i].querySelector(
+										'[data-caption="Collection"]',
+									);
 
-								// 	const output = `${libraryName[0].innerText.replace("Searching...", "")} ${shelfName[0].innerText} ${statusName[0].innerText.replace("Searching...", "")}`;
+									const subjectName = rows[i].querySelector(
+										'[data-caption="Call number"]',
+									);
 
-								// 	bookHardcopiesArray.push(output);
-								// }
+									const statusName = rows[i].querySelector(
+										'[data-caption="Status/Desc"]',
+									);
+
+									const output = `${libraryName.innerText}`
+
+									console.log('================')
+									console.log("output", output);
+									console.log('================')
+
+									// const output = `${libraryName[0].innerText.replace("Searching...", "")} ${shelfName[0].innerText} ${statusName[0].innerText.replace("Searching...", "")}`;
+
+									// 	bookHardcopiesArray.push(output);
+								}
 
 								// finalOutputObject.hardcopies = bookHardcopiesArray;
 
