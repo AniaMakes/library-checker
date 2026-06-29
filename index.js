@@ -18,6 +18,6 @@ const bookList = [
 const browser = await puppeteer.launch({ headless: false });
 const page = await browser.newPage();
 
-await checkCambridgeshire(page, bookList);
-console.log(JSON.stringify(bookList));
+await checkCambridgeshire(browser, page, bookList);
+// console.log(JSON.stringify(bookList));
 // await browser.close();

@@ -5,7 +5,7 @@
  * @param page - Puppeteer page.
  * @param bookList - Array of objects
  */
-export default async function checkCambridgeshire(page, bookList) {
+export default async function checkCambridgeshire(browser, page, bookList) {
 	// Navigate the page to a URL.
 	await page.goto("https://cambridgeshire.spydus.co.uk/");
 
@@ -71,7 +71,6 @@ export default async function checkCambridgeshire(page, bookList) {
 			const searchResultOutput = [];
 
 			for (const result of searchResults) {
-
 				const innerText = await result.evaluate(node => node.innerText);
 
 				// only run the scraper on results that match the author as the search results can unrelated
@@ -90,20 +89,64 @@ export default async function checkCambridgeshire(page, bookList) {
 					});
 
 					const availabilityLink = await result.$('[data-bs-target="#holdingsDlg"]')
-					await availabilityLink.click()
+					const availabilityLinkHref = await availabilityLink.evaluate(node => node.href)
 
-					// await page.click(availabilityLink)
-					// console.log('================')
-					console.log("resultTitle", resultTitle);
-					console.log("resultAuthorAndYear", resultAuthorAndYear);
-					// console.log('================')
+					const availabilityPage = await browser.newPage();
+					await availabilityPage.goto(availabilityLinkHref, { waitUntil: "networkidle2" });
+					await page.waitForNetworkIdle();
 
+					const rows = await availabilityPage.$$eval("tr", function (tableRows) {
+						return tableRows.map(function (tableRow) {
+							if ([...tableRow.querySelectorAll("td")].length) {
+								return [...tableRow.querySelectorAll("td")].map(cell => cell.innerText).filter(data => data)
+							}
+						}).filter(row => row)
+					})
+
+					const finalOutputObject = {
+						title: resultTitle,
+						author: resultAuthorAndYear[0],
+						year: resultAuthorAndYear[1]
+					}
+
+					const itemOutput = rows.map(function (row) {
+						const rowOutput = {}
+
+						if (row.includes("eBooks")) {
+							rowOutput.format = "ebook";
+							rowOutput.details = row[2]
+							return rowOutput
+						}
+
+						if (row.includes("eAudio")) {
+							rowOutput.format = "eaudiobook";
+							rowOutput.details = row[2]
+							return rowOutput
+						}
+
+						rowOutput.format = "physical book"
+						rowOutput.bookDetails = {
+							location: row[0],
+							collection: row[1],
+							callNumber: row[2],
+							status: row[3],
+						}
+
+
+						return rowOutput
+					})
+
+					finalOutputObject.details = itemOutput;
+
+					searchResultOutput.push(finalOutputObject);
+
+					await availabilityPage.close()
 				}
-
-				console.log('================')
-				console.log("innerText", innerText);
-				console.log('================')
 			}
+
+			console.log('================')
+			console.log("searchResultOutput", searchResultOutput);
+			console.log('================')
 
 		} catch (error) {
 			console.log(error);
