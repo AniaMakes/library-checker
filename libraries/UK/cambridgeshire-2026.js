@@ -50,11 +50,11 @@ export default async function checkCambridgeshire(browser, page, bookList) {
 
 			const selector = await raceSelectors(page, [
 				".result-content-records",
-				".alert",
+				".alert-info",
 			]);
 
 			// if there are no results, report that back, then go to the next book
-			if (selector === ".alert") {
+			if (selector === ".alert-info") {
 				bookList[i].cambridgeshire = "no match found";
 				continue;
 			}
@@ -64,8 +64,6 @@ export default async function checkCambridgeshire(browser, page, bookList) {
 			await page.waitForNetworkIdle();
 
 			// gets result "cards"
-
-			//TODO refactor so that results returns the list to puppeteer node process, do as much from within the node process, then get modal that way too
 
 			const searchResults = await page.$$(".card-body");
 			const searchResultOutput = [];
@@ -144,18 +142,25 @@ export default async function checkCambridgeshire(browser, page, bookList) {
 				}
 			}
 
-			console.log('================')
-			console.log("searchResultOutput", searchResultOutput);
-			console.log('================')
+			// console.log('================')
+			// console.log("searchResultOutput", searchResultOutput);
+			// console.log('================')
+			results = searchResultOutput
+
+			// be kind, don't spam them with requests, wait 5s before each
+			const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
+			await sleep(5000);
 
 		} catch (error) {
 			console.log(error);
 		}
 
-		bookList[i].cambridgeshire = results;
-
-		// be kind, don't spam them with requests, wait 5s before each
-		const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
-		await sleep(5000);
+		bookList[i].cambridgeshire = bookList[i].cambridgeshire || results;
 	}
+
+	console.log('================')
+	console.log("bookList", JSON.stringify(bookList));
+	console.log('================')
+
+	return bookList
 }

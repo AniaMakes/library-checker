@@ -8,8 +8,9 @@ import checkCityOfLondon from "./libraries/UK/cityOfLondon.js";
 // const tidyHardcoverData = tidyHardcoverOutput(books);
 
 const bookList = [
-	{ title: "Katabasis", authorSurname: "Kuang" },
-	{ title: "The binding", authorSurname: "Collins" },
+	// { title: "Katabasis", authorSurname: "Kuang" },
+	// { title: "The binding", authorSurname: "Collins" },
+	{ title: "Bromantasy", authorSurname: "Roche" }
 ];
 
 // const bookList = tidyHardcoverData;
